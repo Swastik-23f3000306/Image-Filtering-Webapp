@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Image Smoothing and Sharpening</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            background:#121212;
+            color:white;
+            text-align:center;
+            margin:0;
+            padding:20px;
+        }
+
+        h1{
+            margin-bottom:30px;
+        }
+
+        form{
+            margin-bottom:20px;
+        }
+
+        input[type="file"]{
+            margin:10px;
+        }
+
+        button{
+            padding:10px 20px;
+            border:none;
+            border-radius:10px;
+            background:cyan;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        select{
+            padding:10px;
+            border-radius:10px;
+            font-size:16px;
+            margin-bottom:20px;
+        }
+
+        .compare-container{
+            position:relative;
+            width:700px;
+            max-width:90%;
+            margin:auto;
+            overflow:hidden;
+            border-radius:15px;
+            box-shadow:0 0 20px rgba(0,255,255,0.4);
+        }
+
+        .compare-container img{
+            width:100%;
+            display:block;
+        }
+
+        .filtered-image{
+            position:absolute;
+            top:0;
+            left:0;
+            width:50%;
+            overflow:hidden;
+            transition:width 0.05s;
+        }
+
+        .slider{
+            position:absolute;
+            top:0;
+            left:50%;
+            width:4px;
+            height:100%;
+            background:white;
+            cursor:ew-resize;
+            z-index:10;
+        }
+
+        .slider::before{
+            content:'';
+            position:absolute;
+            top:50%;
+            left:-8px;
+            width:20px;
+            height:20px;
+            background:cyan;
+            border-radius:50%;
+            transform:translateY(-50%);
+        }
+
+        .label-left{
+            position:absolute;
+            top:10px;
+            left:10px;
+            background:rgba(0,0,0,0.6);
+            padding:5px 10px;
+            border-radius:5px;
+        }
+
+        .label-right{
+            position:absolute;
+            top:10px;
+            right:10px;
+            background:rgba(0,0,0,0.6);
+            padding:5px 10px;
+            border-radius:5px;
+            z-index:20;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>Image Smoothing and Sharpening</h1>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <input type="file" name="image" required>
+
+    <button type="submit">
+        Upload
+    </button>
+
+</form>
+
+{% if original %}
+
+<h2>Before vs After Comparison</h2>
+
+<select id="filterSelect">
+
+    <option value="{{ mean }}">
+        Mean Filter
+    </option>
+
+    <option value="{{ gaussian }}" selected>
+        Gaussian Filter
+    </option>
+
+    <option value="{{ laplacian }}">
+        Laplacian Filter
+    </option>
+
+</select>
+
+<div class="compare-container" id="compare-container">
+
+    <div class="label-left">
+        Original
+    </div>
+
+    <div class="label-right" id="filterLabel">
+        Gaussian Filter
+    </div>
+
+    <img src="{{ original }}">
+
+    <div class="filtered-image" id="filtered-image">
+
+        <img src="{{ gaussian }}" id="filtered-img">
+
+    </div>
+
+    <div class="slider" id="slider"></div>
+
+</div>
+
+{% endif %}
+
+<script>
+
+const slider = document.getElementById("slider");
+const filtered = document.getElementById("filtered-image");
+const container = document.getElementById("compare-container");
+
+let dragging = false;
+
+if(slider){
+
+    slider.addEventListener("mousedown", () => {
+        dragging = true;
+    });
+
+    window.addEventListener("mouseup", () => {
+        dragging = false;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+
+        if(!dragging) return;
+
+        const rect = container.getBoundingClientRect();
+
+        let x = e.clientX - rect.left;
+
+        if(x < 0) x = 0;
+        if(x > rect.width) x = rect.width;
+
+        slider.style.left = x + "px";
+
+        filtered.style.width = x + "px";
+
+    });
+
+}
+
+const filterSelect = document.getElementById("filterSelect");
+const filteredImg = document.getElementById("filtered-img");
+const filterLabel = document.getElementById("filterLabel");
+
+if(filterSelect){
+
+    filterSelect.addEventListener("change", () => {
+
+        filteredImg.src = filterSelect.value;
+
+        filterLabel.innerText =
+            filterSelect.options[filterSelect.selectedIndex].text;
+
+    });
+
+}
+
+</script>
+
+</body>
+
+</html>
