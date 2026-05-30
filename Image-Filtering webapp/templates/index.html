@@ -7,107 +7,119 @@
 
     <style>
 
-        body{
-            font-family: Arial;
-            background:#121212;
-            color:white;
-            text-align:center;
+        *{
             margin:0;
-            padding:20px;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #111827, #1e293b);
+            color:white;
+            min-height:100vh;
+            text-align:center;
+            padding:30px;
         }
 
         h1{
+            font-size:42px;
+            margin-bottom:10px;
+            color:cyan;
+        }
+
+        .subtitle{
+            font-size:18px;
+            color:#cbd5e1;
             margin-bottom:30px;
         }
 
-        form{
-            margin-bottom:20px;
+        .upload-box{
+            background:rgba(255,255,255,0.08);
+            padding:25px;
+            border-radius:20px;
+            width:fit-content;
+            margin:auto;
         }
 
         input[type="file"]{
-            margin:10px;
+            margin:15px;
+            color:white;
         }
 
-        button{
-            padding:10px 20px;
+        .upload-btn{
+            padding:12px 24px;
             border:none;
-            border-radius:10px;
+            border-radius:12px;
             background:cyan;
+            color:black;
             font-size:16px;
+            font-weight:bold;
             cursor:pointer;
         }
 
-        select{
-            padding:10px;
-            border-radius:10px;
+        .filter-buttons{
+            margin-top:30px;
+        }
+
+        .filter-buttons button{
+            padding:12px 20px;
+            margin:10px;
+            border:none;
+            border-radius:12px;
+            background:#1e293b;
+            color:white;
+            border:1px solid cyan;
+            cursor:pointer;
             font-size:16px;
-            margin-bottom:20px;
         }
 
-        .compare-container{
-            position:relative;
-            width:700px;
-            max-width:90%;
-            margin:auto;
-            overflow:hidden;
-            border-radius:15px;
-            box-shadow:0 0 20px rgba(0,255,255,0.4);
-        }
-
-        .compare-container img{
-            width:100%;
-            display:block;
-        }
-
-        .filtered-image{
-            position:absolute;
-            top:0;
-            left:0;
-            width:50%;
-            overflow:hidden;
-            transition:width 0.05s;
-        }
-
-        .slider{
-            position:absolute;
-            top:0;
-            left:50%;
-            width:4px;
-            height:100%;
-            background:white;
-            cursor:ew-resize;
-            z-index:10;
-        }
-
-        .slider::before{
-            content:'';
-            position:absolute;
-            top:50%;
-            left:-8px;
-            width:20px;
-            height:20px;
+        .filter-buttons button:hover{
             background:cyan;
-            border-radius:50%;
-            transform:translateY(-50%);
+            color:black;
         }
 
-        .label-left{
-            position:absolute;
-            top:10px;
-            left:10px;
-            background:rgba(0,0,0,0.6);
-            padding:5px 10px;
-            border-radius:5px;
+        .image-container{
+            display:flex;
+            justify-content:center;
+            margin-top:40px;
         }
 
-        .label-right{
-            position:absolute;
-            top:10px;
-            right:10px;
-            background:rgba(0,0,0,0.6);
-            padding:5px 10px;
-            border-radius:5px;
-            z-index:20;
+        .image-box{
+            background:rgba(255,255,255,0.08);
+            padding:20px;
+            border-radius:20px;
+        }
+
+        img{
+            width:500px;
+            max-width:90vw;
+            border-radius:15px;
+            margin-top:10px;
+        }
+
+        h3{
+            margin-bottom:10px;
+            color:cyan;
+            font-size:28px;
+        }
+
+        .info-box{
+            margin-top:40px;
+            background:rgba(255,255,255,0.08);
+            padding:20px;
+            border-radius:20px;
+            max-width:900px;
+            margin-left:auto;
+            margin-right:auto;
+            line-height:1.8;
+            color:#e2e8f0;
+        }
+
+        footer{
+            margin-top:40px;
+            color:#94a3b8;
+            font-size:16px;
         }
 
     </style>
@@ -118,111 +130,116 @@
 
 <h1>Image Smoothing and Sharpening</h1>
 
-<form method="POST" enctype="multipart/form-data">
+<p class="subtitle">
+    Apply Mean, Gaussian, and Laplacian filters to grayscale images
+</p>
 
-    <input type="file" name="image" required>
+<div class="upload-box">
 
-    <button type="submit">
-        Upload
-    </button>
+    <form method="POST" enctype="multipart/form-data">
 
-</form>
+        <input type="file" name="image" required>
+
+        <br>
+
+        <button class="upload-btn" type="submit">
+            Upload Image
+        </button>
+
+    </form>
+
+</div>
 
 {% if original %}
 
-<h2>Before vs After Comparison</h2>
+<div class="filter-buttons">
 
-<select id="filterSelect">
+    <button type="button"
+        onclick="changeFilter('{{ original }}', 'Original Image')">
 
-    <option value="{{ mean }}">
-        Mean Filter
-    </option>
-
-    <option value="{{ gaussian }}" selected>
-        Gaussian Filter
-    </option>
-
-    <option value="{{ laplacian }}">
-        Laplacian Filter
-    </option>
-
-</select>
-
-<div class="compare-container" id="compare-container">
-
-    <div class="label-left">
         Original
-    </div>
 
-    <div class="label-right" id="filterLabel">
+    </button>
+
+    <button type="button"
+        onclick="changeFilter('{{ mean }}', 'Mean Filter')">
+
+        Mean Filter
+
+    </button>
+
+    <button type="button"
+        onclick="changeFilter('{{ gaussian }}', 'Gaussian Filter')">
+
         Gaussian Filter
+
+    </button>
+
+    <button type="button"
+        onclick="changeFilter('{{ laplacian }}', 'Laplacian Filter')">
+
+        Laplacian Filter
+
+    </button>
+
+</div>
+
+<div class="image-container">
+
+    <div class="image-box">
+
+        <h3 id="filter-title">
+            Original Image
+        </h3>
+
+        <img src="{{ original }}" id="display-image">
+
     </div>
 
-    <img src="{{ original }}">
+</div>
 
-    <div class="filtered-image" id="filtered-image">
+<div class="info-box">
 
-        <img src="{{ gaussian }}" id="filtered-img">
+    <h2 style="color:cyan; margin-bottom:15px;">
+        Filter Descriptions
+    </h2>
 
-    </div>
+    <p>
+        <b>Mean Filter:</b>
+        Averages neighboring pixels to smooth the image and reduce noise.
+    </p>
 
-    <div class="slider" id="slider"></div>
+    <br>
+
+    <p>
+        <b>Gaussian Filter:</b>
+        Uses weighted averaging for smoother and more natural blurring.
+    </p>
+
+    <br>
+
+    <p>
+        <b>Laplacian Filter:</b>
+        Detects rapid intensity changes to highlight edges and sharpen details.
+    </p>
 
 </div>
 
 {% endif %}
 
+<footer>
+
+    Created by <b>Swastik Ray</b>
+
+</footer>
+
 <script>
 
-const slider = document.getElementById("slider");
-const filtered = document.getElementById("filtered-image");
-const container = document.getElementById("compare-container");
+function changeFilter(imagePath, filterName){
 
-let dragging = false;
+    document.getElementById("display-image").src = imagePath;
 
-if(slider){
-
-    slider.addEventListener("mousedown", () => {
-        dragging = true;
-    });
-
-    window.addEventListener("mouseup", () => {
-        dragging = false;
-    });
-
-    window.addEventListener("mousemove", (e) => {
-
-        if(!dragging) return;
-
-        const rect = container.getBoundingClientRect();
-
-        let x = e.clientX - rect.left;
-
-        if(x < 0) x = 0;
-        if(x > rect.width) x = rect.width;
-
-        slider.style.left = x + "px";
-
-        filtered.style.width = x + "px";
-
-    });
-
-}
-
-const filterSelect = document.getElementById("filterSelect");
-const filteredImg = document.getElementById("filtered-img");
-const filterLabel = document.getElementById("filterLabel");
-
-if(filterSelect){
-
-    filterSelect.addEventListener("change", () => {
-
-        filteredImg.src = filterSelect.value;
-
-        filterLabel.innerText =
-            filterSelect.options[filterSelect.selectedIndex].text;
-
-    });
+    document.getElementById("filter-title").innerText = filterName;
 
 }
 
